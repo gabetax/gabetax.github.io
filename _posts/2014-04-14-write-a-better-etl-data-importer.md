@@ -16,14 +16,14 @@ share: true
 
 Web applications do not live in a vacuum. Most of the web applications we write today need to operate on data from a variety of sources:
 
-- CSV files from a customer-managed Excel Worksheets
+- CSV files from customer-managed Excel worksheets
 - CSV or XML files dumped from other databases
 - Web APIs
 - Scraped web pages
 
 To get this data into our system, we need to write importers, more technically known as ETL's - [extract, transform, and load](https://en.wikipedia.org/wiki/Extract,_transform,_load). These importers are often implemented as some form of command line script or rake task, and initiated either manually for one-off loads, or periodically through a crontab or other scheduler. They may be short running, completing in seconds, or long running, taking hours or days.
 
-Over the years at [Mudbug Media](http://mudbugmedia.com), we've written _a lot_ of importers. Along the away we've encountered a gamut of common pain points and mistakes. For one of our annual department goals, we've organized them into a checklist to review when writing new importers. Most of these examples are oriented specifically for Ruby on Rails ecosystem, but can apply to most languages and frameworks.
+Over the years at [Mudbug Media](http://mudbugmedia.com), we've written _a lot_ of importers. Along the away we've encountered a gamut of common pain points and mistakes. For one of our annual department goals, we've organized them into a checklist to review when writing new importers. Most of these examples are oriented specifically for a Ruby on Rails ecosystem, but can apply to most languages and frameworks.
 
 ### 1. Decouple Your Logic
 
@@ -51,9 +51,9 @@ If the source material is an API, use a gem like [vcr](https://github.com/vcr/vc
 
 ### 3. Instrument and Log
 
-> How long has the daily importer has been crashing? Did it always take this long to run? Did we get stale data last Thursday?
+> How long has the daily importer been crashing? Did it always take this long to run? Did we get stale data last Thursday?
 
-Every time your importer runs, gather statistics and log them to the database. Good values to capture are start and stop times, checksums of any input files, record counts,  the process id, and error messages. Store your import logs in the database, and your web application can provide a status message indicating how current the data is.
+Every time your importer runs, gather statistics and log them to the database. Good values to capture are start and stop times, checksums of any input files, record counts, the process id, and error messages. Store your import logs in the database, and your web application can provide a status message indicating how current the data is.
 
 Logging doesn't have to end at the database. Even if you are rescuing exceptions to log them in the database, you should still reraise _unexpected_ exceptions to log them to your [favorite](http://raygun.io/) [error](https://www.honeybadger.io/) [tracker](https://airbrake.io/) [service](https://www.getsentry.com/).
 
@@ -66,8 +66,7 @@ You don't want to start an import job and sit staring at the terminal wondering 
 ### 5. Be Idempotent
 
 No importer ever gets run just once. Too often, developers will manually truncate their tables between test runs. This invariably leads to duplicate records when someone else runs the import again a year later. If your application treats your imported tables as read-only, it may suffice to use the easy strategy of automatically truncating before importing. 
-
-However, if anything else modifies the table, you need to have a versioning strategy to merge the existing table data with data to import. A merge strategy may also be prefered for importers with a long run time that need the ability to stop and resume, or run incrementally. The simplest strategy is to establish updated_at timestamps on both the table and import source, and let the most recent overwrite the other. This much more complex than just clearing out the table. Make sure to discuss this consideration with your team and customer during initial development, and make sure you’re provided with the data to implement it.
+However, if anything else modifies the table, you need to have a versioning strategy to merge the existing table data with data to import. A merge strategy may also be prefered for importers with a long run time that need the ability to stop and resume, or run incrementally. The simplest strategy is to establish updated_at timestamps on both the table and import source, and let the most recent overwrite the other. This is much more complex than just clearing out the table. Make sure to discuss this consideration with your team and customer during initial development, and make sure you’re provided with the data to implement it.
 
 ### 6. Use Transactions
 
@@ -120,7 +119,7 @@ end
 
 Fundamentally, there's a lot to like about the above code. It's all implemented in the same layer and language, which makes it easy to reason about, easy to test, checks the data against your existing validations, and feels elegant. Unfortunately, there's an enormous amount of overhead with building and saving records one at a time through ActiveRecord.
 
-Databases are made for speed. When importing large CSVs, move as much heavy lifting into the database layer as possible. In Postgres, use [`COPY`](http://www.postgresql.org/docs/9.3/static/sql-copy.html). In MySQL, use [`LOAD DATA`](http://dev.mysql.com/doc/refman/5.1/en/load-data.html)). I've reduced a importer's processing time from 15 minutes down to 3 seconds moving the processing from ActiveRecord directly into the database.
+Databases are made for speed. When importing large CSVs, move as much heavy lifting into the database layer as possible. In Postgres, use [`COPY`](http://www.postgresql.org/docs/9.3/static/sql-copy.html). In MySQL, use [`LOAD DATA`](http://dev.mysql.com/doc/refman/5.1/en/load-data.html)). I've reduced an importer's processing time from 15 minutes down to 3 seconds moving the processing from ActiveRecord directly into the database.
 
 You may need to make some sacrifices in exchange for this performance boon. Data transformations between the CSV and the database now need to happen in SQL. You can achieve this by first importing to a separate [TEMPORARY](http://www.postgresql.org/docs/9.3/static/sql-createtable.html#AEN72686) table and transforming and loading via an `INSERT ... SELECT` statement. Obviously, you won't have application-layer tools available for doing this. We had to write [attr_encrypted_pgcrypto](https://github.com/gabetax/attr_encrypted_pgcrypto) because Postgres couldn't access [attr_encrypted](https://github.com/attr-encrypted/attr_encrypted)'s ruby-based OpenSSL implementation. You'll also lose validations implemented in your model classes, and may have to duplicate that logic using [database constraints](http://www.postgresql.org/docs/9.3/static/ddl-constraints.html) if it's important.
 
@@ -186,4 +185,4 @@ end
 
 ## Wrapping Up
 
-Applications can not live without their data, but often time imports don't get the  level of detail and forethought that they deserve. When you're designing a new importer, give forethought to its run time, how it will get run, how you'll monitor it, how reliable your data is, and the risks if the import fails. Let your context guide your implementation, and you'll have an importer you can depend on.
+Applications can not live without their data, but often time imports don't get the level of detail and forethought that they deserve. When you're designing a new importer, give forethought to its run time, how it will get run, how you'll monitor it, how reliable your data is, and the risks if the import fails. Let your context guide your implementation, and you'll have an importer you can depend on.
