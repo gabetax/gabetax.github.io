@@ -2,7 +2,7 @@
 layout: post
 headline: "Eight ways to write a better data importer"
 title: "Eight ways to write a better data importer"
-description: "bees"
+description:
 category: programming
 tags: [importers, etl, ruby, rails]
 modified: 2014-04-14
@@ -65,7 +65,9 @@ You don't want to start an import job and sit staring at the terminal wondering 
 
 ### 5. Be Idempotent
 
-No importer ever gets run just once. Too often, developers will manually truncate their tables between test runs. This invariable leads to duplicate records when the import is run by someone else a year later. If your application treats your imported tables as read-only, it may suffice to use the easy strategy of truncating before importing. However, if anything else modifies to table you need to have a versioning strategy to merge the existing table data with data to import. A merge strategy may also be prefered for importers with a long run time that need the ability to stop and resume, or run incrementally. The simplest strategy you can use is to establish `updated_at` timestamps on both the table and import source, and let the most recent overwrite the other. This much more complex than just clearing out the table. Make sure to discuss this consideration with your team and customer during initial development, and make sure you're provided with the data implement it.
+No importer ever gets run just once. Too often, developers will manually truncate their tables between test runs. This invariably leads to duplicate records when someone else runs the import again a year later. If your application treats your imported tables as read-only, it may suffice to use the easy strategy of automatically truncating before importing. 
+
+However, if anything else modifies the table, you need to have a versioning strategy to merge the existing table data with data to import. A merge strategy may also be prefered for importers with a long run time that need the ability to stop and resume, or run incrementally. The simplest strategy is to establish updated_at timestamps on both the table and import source, and let the most recent overwrite the other. This much more complex than just clearing out the table. Make sure to discuss this consideration with your team and customer during initial development, and make sure you’re provided with the data to implement it.
 
 ### 6. Use Transactions
 
@@ -184,4 +186,4 @@ end
 
 ## Wrapping Up
 
-Applications can not live without their data, but often time imports don't get the  level of detail and forethought that they deserve. When you're designing a new importer, give forethought to its run time, how it will get run, how you'll monitor it, how reliable your data is, and the risks if the import fails. Let your context guide your implementation, and 
+Applications can not live without their data, but often time imports don't get the  level of detail and forethought that they deserve. When you're designing a new importer, give forethought to its run time, how it will get run, how you'll monitor it, how reliable your data is, and the risks if the import fails. Let your context guide your implementation, and you'll have an importer you can depend on.
