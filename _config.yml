@@ -1,21 +1,21 @@
-title:            Site Title
-description:      Describe your website here.
+title:            gabetax
+description:
 disqus_shortname: 
 #Your site's domain goes here. Leave localhost server or blank when working locally.
 url:              http://localhost:4000
 
 # Owner/author information
 owner:
-  name:           Your Name
+  name:           Gabe Martin-Dempesy
   avatar:         avatar.jpg
-  bio:            "Your bio goes here. It shouldn't be super long but a good two sentences or two should suffice."
-  email:          you@email.com
+  bio:            "Ruby developer. System administrator. Homebrewer. Food adventurist. Greyhound spooner."
+  email:          
   # Social networking links used in footer. Update and remove as you like.
-  twitter:        
+  twitter:        gabetax
   facebook:       
-  github:         
+  github:         gabetax
   stackexchange:  
-  linkedin:       
+  linkedin:       http://www.linkedin.com/profile/view?id=48147017
   instagram:      
   flickr:         
   tumblr:         
@@ -26,7 +26,7 @@ owner:
 background: 
 
 # Analytics and webmaster tools stuff goes here
-google_analytics:   
+google_analytics:   UA-48998021-1
 google_verify:      
 # https://ssl.bing.com/webmaster/configure/verify/ownership Option 2 content= goes here
 bing_verify:         
@@ -34,20 +34,20 @@ bing_verify:
 # Links to include in top navigation
 # For external links add external: true
 links:
-  - title: Theme Setup
-    url: /theme-setup
-  - title: External Link
-    url: http://mademistakes.com
-    external: true
+  # - title: Theme Setup
+  #   url: /theme-setup
+  # - title: External Link
+  #   url: http://mademistakes.com
+  #   external: true
 
 # http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-timezone:    America/New_York
+timezone:    America/Los_Angeles
 future:      true
 pygments:    true
 markdown:    kramdown
 
 # https://github.com/mojombo/jekyll/wiki/Permalinks
-permalink:   /:categories/:title/
+permalink:   /:year/:month/:day/:title/
 
 # Amount of post to show on home page
 paginate: 5
